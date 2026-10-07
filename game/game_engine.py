@@ -36,6 +36,12 @@ class GameEngine:
 
         guess = int(self.input_box.text)
 
+        if guess < 1 or guess > 100:
+            self.feedback_msg = "Please enter a number between 1 and 100!"
+            self.feedback_color = (240, 200, 80)
+            self.input_box.clear()
+            return
+
         self.attempts += 1
         self.input_box.clear()
 
