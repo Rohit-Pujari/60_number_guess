@@ -13,6 +13,7 @@ class GameEngine:
         self.game_won = False
         self.range_min = 1
         self.range_max = 100
+        self.guess_history = []
 
         self.input_box = TextBox(width // 2 - 110, 150, 120, 48)
         self.submit_btn = pygame.Rect(width // 2 + 25, 150, 100, 48)
@@ -39,14 +40,19 @@ class GameEngine:
             self.range_min = max(self.range_min, guess + 1)
             self.feedback_msg = f"TOO LOW! (Guess was {guess})"
             self.feedback_color = (80, 160, 240)
+            self.guess_history.append((guess, "TOO LOW", self.feedback_color))
         elif guess > self.secret_number:
             self.range_max = min(self.range_max, guess - 1)
             self.feedback_msg = f"TOO HIGH! (Guess was {guess})"
             self.feedback_color = (240, 100, 80)
+            self.guess_history.append((guess, "TOO HIGH", self.feedback_color))
         else:
             self.feedback_msg = f"CORRECT! Found in {self.attempts} attempts."
             self.feedback_color = (80, 220, 90)
+            self.guess_history.append((guess, "CORRECT", self.feedback_color))
             self.game_won = True
+
+        self.guess_history = self.guess_history[-5:]
 
     def reset(self):
         self.secret_number = random.randint(1, 100)
@@ -56,6 +62,7 @@ class GameEngine:
         self.game_won = False
         self.range_min = 1
         self.range_max = 100
+        self.guess_history.clear()
         self.input_box.clear()
 
     def handle_event(self, event):
@@ -99,6 +106,15 @@ class GameEngine:
         feedback_surf = self.font_medium.render(self.feedback_msg, True, self.feedback_color)
         screen.blit(feedback_surf, (self.width // 2 - feedback_surf.get_width() // 2, 235))
 
+        history_title = self.font_medium.render("Recent Guesses", True, (220, 220, 220))
+        screen.blit(history_title, (self.width // 2 - history_title.get_width() // 2, 275))
+
+        history_y = 310
+        for guess, result, color in reversed(self.guess_history):
+            history_surf = self.font_medium.render(f"{guess}: {result}", True, color)
+            screen.blit(history_surf, (self.width // 2 - history_surf.get_width() // 2, history_y))
+            history_y += 32
+
         if self.game_won:
             restart_surf = self.font_medium.render("Press [R] to Start a New Game", True, (255, 220, 80))
-            screen.blit(restart_surf, (self.width // 2 - restart_surf.get_width() // 2, 295))
+            screen.blit(restart_surf, (self.width // 2 - restart_surf.get_width() // 2, 500))
